@@ -39,6 +39,9 @@ ABlasterCharacter::ABlasterCharacter()
 	// General combat component to be replicated
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+
+	// Ability to crouch is always true
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -74,6 +77,10 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUp", this, &ABlasterCharacter::LookUp);
 	
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ABlasterCharacter::EquipButtonPressed);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABlasterCharacter::CrouchButtonPressed);
+
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABlasterCharacter::AimButtonPressed);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABlasterCharacter::AimButtonReleased);
 }
 
 // Set up our connection to components
@@ -130,6 +137,7 @@ void ABlasterCharacter::EquipButtonPressed()
 	}
 }
 
+// Client's replicated call to equip button
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if (Combat) {
@@ -137,9 +145,33 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	}
 }
 
+
+void ABlasterCharacter::CrouchButtonPressed()
+{
+	if (bIsCrouched) {
+		UnCrouch();
+	}
+	else {
+		Crouch();
+	}
+}
+
+void ABlasterCharacter::AimButtonPressed()
+{
+	if (Combat) {
+		Combat->bAiming = true;
+	}
+}
+
+void ABlasterCharacter::AimButtonReleased()
+{
+	if (Combat) {
+		Combat->bAiming = false;
+	}
+}
+
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OVERLAPPING IN SERVER"));
 	if (OverlappingWeapon) {
 		OverlappingWeapon->ShowPickupWidget(false);
 	}
@@ -154,12 +186,23 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OVERLAPPING IN CLIENT"));
 	if (OverlappingWeapon) {
 		OverlappingWeapon->ShowPickupWidget(true);
 	}
 	if (LastWeapon) {
 		LastWeapon->ShowPickupWidget(false);
 	}
+}
+
+// Public weapon equipped getter
+bool ABlasterCharacter::IsWeaponEquipped()
+{
+	return (Combat && Combat->EquippedWeapon);
+}
+
+// Public aiming getter
+bool ABlasterCharacter::IsAiming()
+{
+	return (Combat && Combat->bAiming);
 }
 

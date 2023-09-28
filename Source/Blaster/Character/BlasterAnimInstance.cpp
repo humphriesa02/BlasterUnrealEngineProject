@@ -30,10 +30,18 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	FVector Velocity = BlasterCharacter->GetVelocity();
 	// Zero out the Z velocity (the jump speed)
 	Velocity.Z = 0.f;
-	// Assign our local speed variable
+
+	// Assign our local variables that determine the animation to play
 	Speed = Velocity.Size();
 
 	bIsInAir = BlasterCharacter->GetCharacterMovement()->IsFalling();
 
 	bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
+
+	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
+
+	// Uses the blaster's internal movement component variable 'bIsCrouched'
+	bIsCrouched = BlasterCharacter->bIsCrouched;
+
+	bAiming = BlasterCharacter->IsAiming();
 }
