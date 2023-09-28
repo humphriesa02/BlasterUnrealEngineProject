@@ -7,6 +7,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -21,6 +22,30 @@ void UCombatComponent::BeginPlay()
 	
 }
 
+void UCombatComponent::SetAiming(bool bIsAiming)
+{
+	// Set aiming locally, so the caller instantly sees the change
+	bAiming = bIsAiming;
+	// Then set aiming by replication so all others see the change
+	ServerSetAiming(bIsAiming);
+}
+
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Rep weapon equipped"));
+	if (EquippedWeapon && Character) {
+		UE_LOG(LogTemp, Warning, TEXT("Equipped weapon and character valid"));
+		// When we equip a weapon, have the player always facing the camera direction
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		Character->bUseControllerRotationYaw = true;
+	}
+}
+
+void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
+{
+	bAiming = bIsAiming;
+}
+
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -33,6 +58,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon)
+	DOREPLIFETIME(UCombatComponent, bAiming)
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
@@ -53,5 +79,9 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	// Sets the owner of the weapon to be character, used for replication
 	EquippedWeapon->SetOwner(Character);
+
+	// When we equip a weapon, have the player always facing the camera direction
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
 }
 
