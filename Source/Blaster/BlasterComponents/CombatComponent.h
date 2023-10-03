@@ -40,6 +40,13 @@ private:
 	bool bAiming;
 	// ---------------------------------
 
+	// To control movespeed when aiming / walking
+	UPROPERTY(EditAnywhere)
+	float BaseWalkSpeed;
+
+	UPROPERTY(EditAnywhere)
+	float AimWalkSpeed;
+
 public:	
 	
 
