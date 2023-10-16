@@ -6,6 +6,8 @@
 #include "Components/WidgetComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimationAsset.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -102,6 +104,17 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 {
 	if (PickupWidget) {
 		PickupWidget->SetVisibility(bShowWidget);
+	}
+}
+
+/// <summary>
+/// Handles weapon related firing capabilities,
+/// like playing animations and sounds
+/// </summary>
+void AWeapon::Fire(const FVector& HitTarget)
+{
+	if (FireAnimation) {
+		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
 }
 
