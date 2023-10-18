@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Casing.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Math/UnrealMathUtility.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -125,13 +126,21 @@ void AWeapon::Fire(const FVector& HitTarget)
 
 		if (AmmoEjectSocket) {
 			FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh);
+			float PitchMod = FMath::RandRange(-40.f, 40.f);
+			float YawMod = FMath::RandRange(-40.f, 40.f);
+			float RollMod = FMath::RandRange(-40.f, 40.f);
+
+			FRotator NewRotator = FRotator(
+				SocketTransform.GetRotation().Rotator().Pitch + PitchMod,
+				SocketTransform.GetRotation().Rotator().Yaw + YawMod,
+				SocketTransform.GetRotation().Rotator().Roll + RollMod);
 
 			UWorld* World = GetWorld();
 			if (World) {
 				World->SpawnActor<ACasing>(
 					CasingClass,
 					SocketTransform.GetLocation(),
-					SocketTransform.GetRotation().Rotator()
+					NewRotator
 				);
 			}
 		}

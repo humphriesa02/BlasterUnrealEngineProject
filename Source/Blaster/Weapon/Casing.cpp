@@ -35,6 +35,5 @@ void ACasing::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 		bPlayedSound = true;
 	}
 	SetLifeSpan(1);
-	//Destroy();
 }
 
