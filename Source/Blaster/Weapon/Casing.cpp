@@ -30,7 +30,8 @@ void ACasing::BeginPlay()
 
 void ACasing::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (ShellSound && !bPlayedSound) {
+	if (ShellSound && !bPlayedSound)
+	{
 		UGameplayStatics::PlaySoundAtLocation(this, ShellSound, GetActorLocation());
 		bPlayedSound = true;
 	}

@@ -34,7 +34,8 @@ void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (Character) {
+	if (Character)
+	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	}
 }
@@ -44,7 +45,8 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	SetHUDCrosshairs(DeltaTime);
-	if (Character && Character->IsLocallyControlled()) {
+	if (Character && Character->IsLocallyControlled())
+	{
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult);
 		HitTarget = HitResult.ImpactPoint;
@@ -58,12 +60,15 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	// If we don't already have a controller, set it to the character's controller
 	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 
-	if (Controller) {
+	if (Controller)
+	{
 		HUD = HUD == nullptr ? Cast<ABlasterHUD>(Controller->GetHUD()) : HUD;
 
-		if (HUD) {
+		if (HUD)
+		{
 			FHUDPackage HUDPackage;
-			if (EquippedWeapon) {
+			if (EquippedWeapon)
+			{
 				HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
 				HUDPackage.CrosshairsLeft = EquippedWeapon->CrosshairsLeft;
 				HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
@@ -85,7 +90,8 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
 
-			if (Character->GetCharacterMovement()->IsFalling()) {
+			if (Character->GetCharacterMovement()->IsFalling())
+			{
 				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f, DeltaTime, 2.25f);
 			}
 			else {
@@ -99,13 +105,27 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	}
 }
 
+void UCombatComponent::InterpFOV(float DeltaTime)
+{
+	if (EquippedWeapon == nullptr) return;
+
+	if (bAiming)
+	{
+
+	}
+	else {
+
+	}
+}
+
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	// Set aiming locally, so the caller instantly sees the change
 	bAiming = bIsAiming;
 	// Then set aiming by replication so all others see the change
 	ServerSetAiming(bIsAiming);
-	if (Character) {
+	if (Character)
+	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
 }
@@ -113,7 +133,8 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 {
 	bAiming = bIsAiming;
-	if (Character) {
+	if (Character)
+	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
 }
@@ -121,7 +142,8 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 void UCombatComponent::OnRep_EquippedWeapon()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Rep weapon equipped"));
-	if (EquippedWeapon && Character) {
+	if (EquippedWeapon && Character)
+	{
 		UE_LOG(LogTemp, Warning, TEXT("Equipped weapon and character valid"));
 		// When we equip a weapon, have the player always facing the camera direction
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -133,7 +155,8 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
 	
-	if (bFireButtonPressed) {
+	if (bFireButtonPressed)
+	{
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult);
 		ServerFire(HitResult.ImpactPoint);
@@ -143,7 +166,8 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
 	FVector2D ViewportSize;
-	if (GEngine && GEngine->GameViewport) {
+	if (GEngine && GEngine->GameViewport)
+	{
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 	}
 
@@ -160,7 +184,8 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	);
 
 	
-	if (bScreenToWorld) {
+	if (bScreenToWorld)
+	{
 		// Create a start and end position for a trace
 		FVector Start = CrosshairWorldPosition;
 
@@ -192,7 +217,8 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr) return;
-	if (Character) {
+	if (Character)
+	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
 	}
@@ -201,7 +227,8 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
-	if (Character == nullptr || WeaponToEquip == nullptr) {
+	if (Character == nullptr || WeaponToEquip == nullptr)
+	{
 		return;
 	}
 
@@ -212,7 +239,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	// Get the skeletal mesh socket of the right hand attached to the character
 	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	// Attach the equipped weapon mesh to the character's hand socket
-	if (HandSocket) {
+	if (HandSocket)
+	{
 		HandSocket->AttachActor(EquippedWeapon, Character-> GetMesh());
 	}
 	// Sets the owner of the weapon to be character, used for replication

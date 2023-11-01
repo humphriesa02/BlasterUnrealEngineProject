@@ -17,19 +17,22 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 	// Find muzzle flash socket, the place to spawn projectiles
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
 
-	if (MuzzleFlashSocket) {
+	if (MuzzleFlashSocket)
+	{
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 
 		// From muzzle flash socket to hit location from TraceUnderCrosshairs
 		FVector ToTarget = HitTarget - SocketTransform.GetLocation();
 		// Get the rotation. I.e. get rotation of muzzle in order to spawn projectile correctly
 		FRotator TargetRotation = ToTarget.Rotation();
-		if (ProjectileClass && InstigatorPawn) {
+		if (ProjectileClass && InstigatorPawn)
+		{
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = GetOwner();
 			SpawnParams.Instigator = InstigatorPawn;
 			UWorld* World = GetWorld();
-			if (World) {
+			if (World)
+			{
 				World->SpawnActor<AProjectile>(
 					ProjectileClass,
 					SocketTransform.GetLocation(),

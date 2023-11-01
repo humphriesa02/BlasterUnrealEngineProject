@@ -7,7 +7,8 @@
 
 void UOverheadWidget::SetDisplayText(FString TextToDisplay)
 {
-	if (DisplayText) {
+	if (DisplayText)
+	{
 		DisplayText->SetText(FText::FromString(TextToDisplay));
 	}
 }
@@ -42,9 +43,11 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 void UOverheadWidget::ShowPlayerName(APawn* InPawn)
 {
 	APlayerState* PlayerState = InPawn->GetPlayerState();
-	if (PlayerState) {
+	if (PlayerState)
+	{
 		FString Name = PlayerState->GetPlayerName();
-		if (!Name.IsEmpty()) {
+		if (!Name.IsEmpty())
+		{
 			SetDisplayText(Name);
 			return;
 		}

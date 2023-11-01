@@ -107,7 +107,8 @@ void ABlasterCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	// If combat has been initialized, set it's character to this class
-	if (Combat) {
+	if (Combat)
+	{
 		Combat->Character = this;
 	}
 }
@@ -122,7 +123,8 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && FireWeaponMontage) {
+	if (AnimInstance && FireWeaponMontage)
+	{
 		AnimInstance->Montage_Play(FireWeaponMontage);
 		// Distinguish between aiming and not aiming
 		FName SectionName;
@@ -133,7 +135,8 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 
 void ABlasterCharacter::MoveForward(float Value)
 {
-	if (Controller != nullptr && Value != 0.f) {
+	if (Controller != nullptr && Value != 0.f)
+	{
 
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X));
@@ -143,7 +146,8 @@ void ABlasterCharacter::MoveForward(float Value)
 
 void ABlasterCharacter::MoveRight(float Value)
 {
-	if (Controller != nullptr && Value != 0.f) {
+	if (Controller != nullptr && Value != 0.f)
+	{
 
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y));
@@ -163,9 +167,11 @@ void ABlasterCharacter::LookUp(float Value)
 
 void ABlasterCharacter::EquipButtonPressed()
 {
-	if (Combat) {
+	if (Combat)
+	{
 		// If on the server equip the weapon directly
-		if (HasAuthority()) {
+		if (HasAuthority())
+		{
 			Combat->EquipWeapon(OverlappingWeapon);
 		}
 		// If not the server then call the RPC in order to tell the server we are equipping
@@ -178,7 +184,8 @@ void ABlasterCharacter::EquipButtonPressed()
 // Client's replicated call to equip button
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
-	if (Combat) {
+	if (Combat)
+	{
 		Combat->EquipWeapon(OverlappingWeapon);
 	}
 }
@@ -191,21 +198,24 @@ void ABlasterCharacter::CrouchButtonPressed()
 
 void ABlasterCharacter::CrouchButtonReleased()
 {
-	if (bIsCrouched) {
+	if (bIsCrouched)
+	{
 		UnCrouch();
 	}
 }
 
 void ABlasterCharacter::AimButtonPressed()
 {
-	if (Combat) {
+	if (Combat)
+	{
 		Combat->SetAiming(true);
 	}
 }
 
 void ABlasterCharacter::AimButtonReleased()
 {
-	if (Combat) {
+	if (Combat)
+	{
 		Combat->SetAiming(false);
 	}
 }
@@ -223,18 +233,21 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 
-	if (Speed == 0.f && !bIsInAir) { // Standing still, not jumping
+	if (Speed == 0.f && !bIsInAir)
+	{ // Standing still, not jumping
 		// Get the difference between our starting and current aim rotations
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
-		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning) {
+		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
 			InterpAO_Yaw = AO_Yaw;
 		}
 		bUseControllerRotationYaw = true;
 		TurnInPlace(DeltaTime);
 	}
-	if (Speed > 0.f || bIsInAir) { // running, or jumping
+	if (Speed > 0.f || bIsInAir)
+	{ // running, or jumping
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		AO_Yaw = 0.f;
 		bUseControllerRotationYaw = true;
@@ -243,7 +256,8 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 
 	AO_Pitch = GetBaseAimRotation().Pitch;
 	// Fix pitch on replicated non current player clients only 
-	if (AO_Pitch > 90.f && !IsLocallyControlled()) {
+	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	{
 		// map pitch from [270, 360) to [-90, 0)
 		FVector2D InRange(270.f, 360.f);
 		FVector2D OutRange(-90.f, 0.f);
@@ -253,30 +267,36 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 
 void ABlasterCharacter::FireButtonPressed()
 {
-	if (Combat) {
+	if (Combat)
+	{
 		Combat->FireButtonPressed(true);
 	}
 }
 
 void ABlasterCharacter::FireButtonReleased()
 {
-	if (Combat) {
+	if (Combat)
+	{
 		Combat->FireButtonPressed(false);
 	}
 }
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
-	if (AO_Yaw > 90.f) {
+	if (AO_Yaw > 90.f)
+	{
 		TurningInPlace = ETurningInPlace::ETIP_Right;
 	}
-	else if (AO_Yaw < -90.f) {
+	else if (AO_Yaw < -90.f)
+	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
-	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning) {
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
 		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
 		AO_Yaw = InterpAO_Yaw;
-		if (FMath::Abs(AO_Yaw) < 15.f) {
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
 			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		}
@@ -285,13 +305,16 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
-	if (OverlappingWeapon) {
+	if (OverlappingWeapon)
+	{
 		OverlappingWeapon->ShowPickupWidget(false);
 	}
 	OverlappingWeapon = Weapon;
 	// Are we the server?
-	if (IsLocallyControlled()) {
-		if (OverlappingWeapon) {
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
 			OverlappingWeapon->ShowPickupWidget(true);
 		}
 	}
@@ -299,10 +322,12 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
-	if (OverlappingWeapon) {
+	if (OverlappingWeapon)
+	{
 		OverlappingWeapon->ShowPickupWidget(true);
 	}
-	if (LastWeapon) {
+	if (LastWeapon)
+	{
 		LastWeapon->ShowPickupWidget(false);
 	}
 }

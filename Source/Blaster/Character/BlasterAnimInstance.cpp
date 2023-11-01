@@ -21,7 +21,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	Super::NativeUpdateAnimation(DeltaTime);
 
 	// Ensure we have the blaster character before we do anything
-	if (BlasterCharacter == nullptr) {
+	if (BlasterCharacter == nullptr)
+	{
 		BlasterCharacter = Cast<ABlasterCharacter>(TryGetPawnOwner());
 	}
 
@@ -64,7 +65,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	// For Fabrik IK, putting the left hand where it should go by socket
 	// First check if we have a weapon and we can get it's mesh, as well as the blaster character's mesh
-	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh()) {
+	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
+	{
 		// Find the transform of the left hand socket
 		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
 		FVector OutPosition;
@@ -76,7 +78,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		LeftHandTransform.SetLocation(OutPosition);
 		LeftHandTransform.SetRotation(FQuat(OutRotation));
 
-		if (BlasterCharacter->IsLocallyControlled()) {
+		if (BlasterCharacter->IsLocallyControlled())
+		{
 			bLocallyControlled = true;
 			FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("Hand_R"), ERelativeTransformSpace::RTS_World);
 			RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));

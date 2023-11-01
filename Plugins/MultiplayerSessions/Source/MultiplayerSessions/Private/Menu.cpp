@@ -129,7 +129,8 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		}
 	}
 
-	if (!bWasSuccessful || SessionResults.Num() == 0) {
+	if (!bWasSuccessful || SessionResults.Num() == 0)
+	{
 		JoinButton->SetIsEnabled(true);
 	}
 }
@@ -154,7 +155,8 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 	}
 
 	// Not able to join
-	if (Result != EOnJoinSessionCompleteResult::Success) {
+	if (Result != EOnJoinSessionCompleteResult::Success)
+	{
 		JoinButton->SetIsEnabled(true);
 	}
 }
