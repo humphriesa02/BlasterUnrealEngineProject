@@ -11,8 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
-//#include "Blaster/HUD/BlasterHUD.h"
 #include "Camera/CameraComponent.h"
+#include "TimerManager.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -20,6 +20,7 @@ UCombatComponent::UCombatComponent()
 
 	BaseWalkSpeed = 600.f;
 	AimWalkSpeed = 450.f;
+	bIsAimingAtEnemy = false;
 }
 
 // Replicate the equipped weapon
@@ -62,6 +63,171 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
+void UCombatComponent::FireButtonPressed(bool bPressed)
+{
+	bFireButtonPressed = bPressed;
+	
+	if (bFireButtonPressed)
+	{
+		Fire();
+	}
+}
+
+void UCombatComponent::Fire()
+{
+	if (bCanFire && EquippedWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Firing"))
+		bCanFire = false;
+		ServerFire(HitTarget);
+		if (EquippedWeapon)
+		{
+			CrosshairShootingFactor = 3.f;
+		}
+		StartFireTimer();
+	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon == nullptr || Character == nullptr) return;
+	Character->GetWorldTimerManager().SetTimer(
+		FireTimer,
+		this,
+		&UCombatComponent::FireTimerFinished,
+		EquippedWeapon->FireDelay
+	);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) return;
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
+	{
+		Fire();
+	}
+}
+
+/// <summary>
+/// Firing the weapon as an RPC
+/// </summary>
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	MulticastFire(TraceHitTarget);
+}
+
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	if (EquippedWeapon == nullptr) return;
+	if (Character)
+	{
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
+	}
+}
+
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (Character == nullptr || WeaponToEquip == nullptr)
+	{
+		return;
+	}
+
+	// Set the local variable weapon to be whatever we are equipping
+	EquippedWeapon = WeaponToEquip;
+	// Set that local weapon's state to be equipped
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	// Get the skeletal mesh socket of the right hand attached to the character
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+	// Attach the equipped weapon mesh to the character's hand socket
+	if (HandSocket)
+	{
+		HandSocket->AttachActor(EquippedWeapon, Character-> GetMesh());
+	}
+	// Sets the owner of the weapon to be character, used for replication
+	EquippedWeapon->SetOwner(Character);
+
+	// When we equip a weapon, have the player always facing the camera direction
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Rep weapon equipped"));
+	if (EquippedWeapon && Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Equipped weapon and character valid"));
+		// When we equip a weapon, have the player always facing the camera direction
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		Character->bUseControllerRotationYaw = true;
+	}
+}
+
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
+{
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	// Put the crosshair location at the center of the screen
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	// Returns true if deproject is successful, else false
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+
+
+	if (bScreenToWorld)
+	{
+		// Create a start and end position for a trace
+		FVector Start = CrosshairWorldPosition;
+
+		// Move the trace forward so it shoots in front of the player
+		if (Character)
+		{
+			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+		}
+
+		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
+
+		// Create the trace, storing impact point in trace
+		GetWorld()->LineTraceSingleByChannel(
+			TraceHitResult,
+			Start,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
+
+		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::Red;
+
+			bIsAimingAtEnemy = true;
+		}
+		else
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::White;
+
+			bIsAimingAtEnemy = false;
+		}
+
+		if (!TraceHitResult.bBlockingHit)
+		{
+			TraceHitResult.ImpactPoint = End;
+		}
+	}
+}
+
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
 	if (Character == nullptr || Character->Controller == nullptr) return;
@@ -83,7 +249,8 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
 				HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
 			}
-			else {
+			else
+			{
 				HUDPackage.CrosshairsCenter = nullptr;
 				HUDPackage.CrosshairsLeft = nullptr;
 				HUDPackage.CrosshairsRight = nullptr;
@@ -102,13 +269,14 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			{
 				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f, DeltaTime, 2.25f);
 			}
-			else {
+			else
+			{
 				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.f, DeltaTime, 30.f);
 			}
 
 			if (bAiming)
 			{
-				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.58f, DeltaTime, 30.f);
+				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.4f, DeltaTime, 30.f);
 			}
 			else
 			{
@@ -117,10 +285,20 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 15.f);
 
-			// Cross hair spread is dependent on following factors: PlayerVelocity, PlayerCrouching, PlayerAiming
-			HUDPackage.CrosshairSpread = Character->bIsCrouched ? 
-				0.5f + (CrosshairVelocityFactor / 2) + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor: 
-				0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
+
+			if (bIsAimingAtEnemy)
+			{
+				CrosshairAimingAtEnemyFactor = 0.5f;
+			}
+			else
+			{
+				CrosshairAimingAtEnemyFactor = 0.f;
+			}
+
+			// Cross hair spread is dependent on following factors: PlayerVelocity, PlayerCrouching, PlayerAiming, CrosshairAminingAtEnemy
+			HUDPackage.CrosshairSpread = Character->bIsCrouched ?
+				1.0f + (CrosshairVelocityFactor / 2) + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor - CrosshairAimingAtEnemyFactor :
+				1.0f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor - CrosshairAimingAtEnemyFactor;
 
 			HUD->SetHUDPackage(HUDPackage);
 		}
@@ -135,7 +313,8 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	{
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
 	}
-	else {
+	else
+	{
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
 	}
 
@@ -165,137 +344,3 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
 }
-
-void UCombatComponent::OnRep_EquippedWeapon()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Rep weapon equipped"));
-	if (EquippedWeapon && Character)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Equipped weapon and character valid"));
-		// When we equip a weapon, have the player always facing the camera direction
-		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-		Character->bUseControllerRotationYaw = true;
-	}
-}
-
-void UCombatComponent::FireButtonPressed(bool bPressed)
-{
-	bFireButtonPressed = bPressed;
-	
-	if (bFireButtonPressed)
-	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		ServerFire(HitResult.ImpactPoint);
-
-		if (EquippedWeapon)
-		{
-			CrosshairShootingFactor = 3.f;
-		}
-	}
-}
-
-void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
-{
-	FVector2D ViewportSize;
-	if (GEngine && GEngine->GameViewport)
-	{
-		GEngine->GameViewport->GetViewportSize(ViewportSize);
-	}
-
-	// Put the crosshair location at the center of the screen
-	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-	FVector CrosshairWorldPosition;
-	FVector CrosshairWorldDirection;
-	// Returns true if deproject is successful, else false
-	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
-		UGameplayStatics::GetPlayerController(this, 0),
-		CrosshairLocation,
-		CrosshairWorldPosition,
-		CrosshairWorldDirection
-	);
-
-	
-	if (bScreenToWorld)
-	{
-		// Create a start and end position for a trace
-		FVector Start = CrosshairWorldPosition;
-
-		// Move the trace forward so it shoots in front of the player
-		if (Character)
-		{
-			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
-			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
-		}
-
-		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
-
-		// Create the trace, storing impact point in trace
-		GetWorld()->LineTraceSingleByChannel(
-			TraceHitResult,
-			Start,
-			End,
-			ECollisionChannel::ECC_Visibility
-		);
-		
-		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
-		{
-			HUDPackage.CrosshairsColor = FLinearColor::Red;
-		}
-		else
-		{
-			HUDPackage.CrosshairsColor = FLinearColor::White;
-		}
-
-		if (!TraceHitResult.bBlockingHit)
-		{
-			TraceHitResult.ImpactPoint = End;
-		}
-	}
-}
-
-/// <summary>
-/// Firing the weapon as an RPC
-/// </summary>
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	MulticastFire(TraceHitTarget);
-}
-
-void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	if (EquippedWeapon == nullptr) return;
-	if (Character)
-	{
-		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
-	}
-}
-
-
-void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
-{
-	if (Character == nullptr || WeaponToEquip == nullptr)
-	{
-		return;
-	}
-
-	// Set the local variable weapon to be whatever we are equipping
-	EquippedWeapon = WeaponToEquip;
-	// Set that local weapon's state to be equipped
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	// Get the skeletal mesh socket of the right hand attached to the character
-	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
-	// Attach the equipped weapon mesh to the character's hand socket
-	if (HandSocket)
-	{
-		HandSocket->AttachActor(EquippedWeapon, Character-> GetMesh());
-	}
-	// Sets the owner of the weapon to be character, used for replication
-	EquippedWeapon->SetOwner(Character);
-
-	// When we equip a weapon, have the player always facing the camera direction
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
-}
-

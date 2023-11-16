@@ -27,6 +27,8 @@ AProjectile::AProjectile()
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
+
+	bHitAPlayer = false;
 }
 
 void AProjectile::BeginPlay()
@@ -58,6 +60,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	if (BlasterCharacter)
 	{
 		BlasterCharacter->MulticastHit();
+		bHitAPlayer = true;
 	}
 
 	Destroy();
@@ -73,10 +76,22 @@ void AProjectile::Destroyed()
 {
 	Super::Destroyed();
 
-	if (ImpactParticles)
+	// Play the player hit particle
+	if (bHitAPlayer)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		if (PlayerImpactParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), PlayerImpactParticles, GetActorTransform());
+		}
 	}
+	else
+	{
+		if (ImpactParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		}
+	}
+	
 
 	if (ImpactSound)
 	{
