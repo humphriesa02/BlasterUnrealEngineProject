@@ -23,9 +23,10 @@ public:
 	void PlayFireMontage(bool bAiming);
 	void PlayElimMontage();
 	virtual void OnRep_ReplicatedMovement() override;
+	void Elim();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Elim();
+	void MulticastElim();
 
 protected:
 	// Called when the game starts or when spawned
@@ -122,6 +123,14 @@ private:
 	class ABlasterPlayerController* BlasterPlayerController;
 
 	bool bElimmed = false;
+
+	// Timer handling the time it takes until player respawns
+	FTimerHandle ElimTimer;
+
+	void ElimTimerFinished();
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
