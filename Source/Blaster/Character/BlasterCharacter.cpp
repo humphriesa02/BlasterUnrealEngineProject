@@ -14,6 +14,7 @@
 #include "BlasterAnimInstance.h"
 #include "Blaster/Blaster.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/GameMode/BlasterGameMode.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -74,6 +75,15 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	Super::OnRep_ReplicatedMovement();
 	SimProxiesTurn();
 	TimeSinceLastMovementReplication = 0.f;
+}
+
+/// <summary>
+/// Handles when a player gets eliminated
+/// </summary>
+void ABlasterCharacter::Elim_Implementation()
+{
+	bElimmed = true;
+	PlayElimMontage();
 }
 
 // Called when the game starts or when spawned
@@ -166,6 +176,16 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+
+void ABlasterCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		float TimeRemaining = AnimInstance->Montage_Play(ElimMontage);
+	}
+}
+
 void ABlasterCharacter::PlayHitReactMontage()
 {
 	// Reference validation
@@ -186,6 +206,22 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
+
+	// Health is 0, player has died
+	if (Health == 0.f)
+	{
+		// Get the blaster game mode from the world
+		ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+		if (BlasterGameMode)
+		{
+			// Get the attached Player Controller
+			BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+			// Get the attacker's Player Controller
+			ABlasterPlayerController* AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
+			// Call the blaster game mode's player elim function
+			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
 }
 
 void ABlasterCharacter::MoveForward(float Value)
