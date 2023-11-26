@@ -155,10 +155,17 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::OnRep_EquippedWeapon()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Rep weapon equipped"));
 	if (EquippedWeapon && Character)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Equipped weapon and character valid"));
+		// Set that local weapon's state to be equipped
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		// Get the skeletal mesh socket of the right hand attached to the character
+		const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+		// Attach the equipped weapon mesh to the character's hand socket
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		}
 		// When we equip a weapon, have the player always facing the camera direction
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
