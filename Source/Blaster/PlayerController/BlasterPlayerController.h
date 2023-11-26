@@ -15,9 +15,22 @@ class BLASTER_API ABlasterPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	void SetHUDHealth(float Health, float MaxHealth);
+	void SetHUDScore(float Score);
+	void SetHUDDefeats(int32 Defeats);
+	void SetHUDElimmedText(bool isShown);
 	virtual void OnPossess(APawn* InPawn) override;
 protected:
 	virtual void BeginPlay() override;
 private:
+	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
+
+	TArray<FString> ElimmedTextArray = {
+		TEXT("Get PWNED, Nerd!"),
+		TEXT("Have you tried shooting back?"),
+		TEXT("Oooooooooooof."),
+		TEXT("Alt + F4."),
+		TEXT("Don't Hate the Player..."),
+		TEXT("Really?")
+	};
 };

@@ -43,3 +43,47 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		BlasterHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
 }
+
+void ABlasterPlayerController::SetHUDScore(float Score)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->ScoreAmount;
+	if (bHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
+		BlasterHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDDefeats(int32 Defeats)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->DefeatsAmount;
+	if (bHUDValid)
+	{
+		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
+		BlasterHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDElimmedText(bool isShown)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->ElimmedText;
+	if (bHUDValid)
+	{
+		BlasterHUD->CharacterOverlay->ElimmedText->SetVisibility(isShown ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		if (ElimmedTextArray.Num() > 0)
+		{
+			int32 RandomIndex = FMath::RandRange(0, ElimmedTextArray.Num() - 1);
+			FString ElimmedText = ElimmedTextArray[RandomIndex];
+			BlasterHUD->CharacterOverlay->ElimmedText->SetText(FText::FromString(ElimmedText));
+		}
+	}
+}

@@ -47,8 +47,11 @@ protected:
 
 
 private:
+	UPROPERTY()
 	class ABlasterCharacter* Character;
+	UPROPERTY()
 	class ABlasterPlayerController* Controller;
+	UPROPERTY()
 	class ABlasterHUD* HUD;
 
 	// These classes will be replicated
