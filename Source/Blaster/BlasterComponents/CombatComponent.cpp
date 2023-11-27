@@ -75,9 +75,8 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	if (bCanFire && EquippedWeapon)
+	if (CanFire())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Firing"))
 		bCanFire = false;
 		ServerFire(HitTarget);
 		if (EquippedWeapon)
@@ -109,6 +108,7 @@ void UCombatComponent::FireTimerFinished()
 	}
 }
 
+
 /// <summary>
 /// Firing the weapon as an RPC
 /// </summary>
@@ -133,6 +133,10 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	{
 		return;
 	}
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Dropped();
+	}
 
 	// Set the local variable weapon to be whatever we are equipping
 	EquippedWeapon = WeaponToEquip;
@@ -147,6 +151,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	// Sets the owner of the weapon to be character, used for replication
 	EquippedWeapon->SetOwner(Character);
+	EquippedWeapon->SetHUDAmmo();
 
 	// When we equip a weapon, have the player always facing the camera direction
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -350,4 +355,10 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
+}
+
+bool UCombatComponent::CanFire()
+{
+	if (EquippedWeapon == nullptr) return false;
+	return !EquippedWeapon->IsEmpty() || !bCanFire;
 }
