@@ -20,6 +20,7 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
+#include "Blaster/Weapon/WeaponTypes.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -237,6 +238,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ABlasterCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterCharacter::FireButtonReleased);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
+	PlayerInputComponent->BindAction("Drop", IE_Pressed, this, &ABlasterCharacter::DropButtonPressed);
 }
 
 // Set up our connection to components
@@ -266,6 +269,29 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 		// Distinguish between aiming and not aiming
 		FName SectionName;
 		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ABlasterCharacter::PlayReloadMontage()
+{
+	// Reference validation
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ReloadMontage)
+	{
+		AnimInstance->Montage_Play(ReloadMontage);
+		// Distinguish between aiming and not aiming
+		FName SectionName;
+		
+		switch (Combat->EquippedWeapon->GetWeaponType())
+		{
+			case EWeaponType::EWT_AssaultRifle:
+				SectionName = FName("Rifle");
+				break;
+		}
+
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
@@ -387,6 +413,18 @@ void ABlasterCharacter::CrouchButtonReleased()
 	{
 		UnCrouch();
 	}
+}
+
+void ABlasterCharacter::ReloadButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->Reload();
+	}
+}
+
+void ABlasterCharacter::DropButtonPressed()
+{
 }
 
 void ABlasterCharacter::AimButtonPressed()
@@ -663,5 +701,11 @@ FVector ABlasterCharacter::GetHitTarget() const
 {
 	if (Combat == nullptr) return FVector();
 	return Combat->HitTarget;
+}
+
+ECombatState ABlasterCharacter::GetCombatState() const
+{
+	if (Combat == nullptr) return ECombatState::ECS_MAX;
+	return Combat->CombatState;
 }
 
