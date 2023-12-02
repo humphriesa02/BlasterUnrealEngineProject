@@ -56,6 +56,8 @@ protected:
 	// Handle everything reload specific for all machines (server and client)
 	void HandleReload();
 
+	int32 AmountToReload();
+
 private:
 	UPROPERTY()
 	class ABlasterCharacter* Character;
@@ -144,6 +146,8 @@ private:
 
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	void UpdateAmmoValues();
 public:	
 	
 
