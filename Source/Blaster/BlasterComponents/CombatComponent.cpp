@@ -113,6 +113,10 @@ void UCombatComponent::FireTimerFinished()
 	{
 		Fire();
 	}
+	if (EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
 }
 
 
@@ -169,11 +173,17 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (Controller)
 	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+		Controller->SetHUDWeaponType(EquippedWeapon->GetWeaponType(), true);
 	}
 
 	if (EquippedWeapon->EquipSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, EquippedWeapon->EquipSound, Character->GetActorLocation());
+	}
+
+	if (EquippedWeapon->IsEmpty())
+	{
+		Reload();
 	}
 
 	// When we equip a weapon, have the player always facing the camera direction

@@ -7,6 +7,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/Weapon/WeaponTypes.h"
 
 
 void ABlasterPlayerController::BeginPlay()
@@ -14,6 +15,13 @@ void ABlasterPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	BlasterHUD = Cast<ABlasterHUD>(GetHUD());
+}
+
+void ABlasterPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	SetHUDTime();
 }
 
 void ABlasterPlayerController::OnPossess(APawn* InPawn)
@@ -25,7 +33,6 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
 	}
 }
-
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
@@ -96,6 +103,45 @@ void ABlasterPlayerController::SetHUDCarriedAmmo(int32 Ammo)
 	}
 }
 
+void ABlasterPlayerController::SetHUDMatchCountdown(float CountdownTime)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->MatchCountdownText;
+	if (bHUDValid)
+	{
+		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
+		int32 Seconds = CountdownTime - Minutes * 60;
+
+		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		BlasterHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(CountdownText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDWeaponType(EWeaponType CurrentWeaponType, bool bIsVisible)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->WeaponTypeText;
+	FString WeaponTypeName;
+	if (bHUDValid)
+	{
+		switch (CurrentWeaponType)
+		{
+		case EWeaponType::EWT_AssaultRifle:
+			WeaponTypeName = TEXT("Assault Rifle");
+			break;
+		case EWeaponType::EWT_MAX:
+			WeaponTypeName = TEXT("UNDEFINED");
+			break;
+		}
+		BlasterHUD->CharacterOverlay->WeaponTypeText->SetVisibility(bIsVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		BlasterHUD->CharacterOverlay->WeaponTypeText->SetText(FText::FromString(WeaponTypeName));
+	}
+}
+
 void ABlasterPlayerController::SetHUDElimmedText(bool isShown)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
@@ -112,4 +158,16 @@ void ABlasterPlayerController::SetHUDElimmedText(bool isShown)
 			BlasterHUD->CharacterOverlay->ElimmedText->SetText(FText::FromString(ElimmedText));
 		}
 	}
+}
+
+void ABlasterPlayerController::SetHUDTime()
+{
+	uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetWorld()->GetTimeSeconds());
+
+	// Update the HUD on a seconds basis, not every tick
+	if (CountdownInt != SecondsLeft)
+	{
+		SetHUDMatchCountdown(MatchTime - GetWorld()->GetTimeSeconds());
+	}
+	CountdownInt = SecondsLeft;
 }

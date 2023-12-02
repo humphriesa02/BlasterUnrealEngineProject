@@ -84,6 +84,7 @@ void ABlasterPlayerState::ShowElimmedText(bool isShown)
 		if (Controller)
 		{
 			Controller->SetHUDElimmedText(IsElimmedTextShown);
+			Controller->SetHUDWeaponType(EWeaponType::EWT_MAX, false);
 		}
 	}
 }
@@ -98,6 +99,7 @@ void ABlasterPlayerState::OnRep_IsElimmedTextShown()
 		if (Controller)
 		{
 			Controller->SetHUDElimmedText(IsElimmedTextShown);
+			Controller->SetHUDWeaponType(EWeaponType::EWT_MAX, false);
 		}
 	}
 }

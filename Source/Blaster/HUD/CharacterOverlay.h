@@ -34,4 +34,10 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ElimmedText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* WeaponTypeText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* MatchCountdownText;
 };

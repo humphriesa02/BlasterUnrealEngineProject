@@ -101,6 +101,19 @@ void AWeapon::SetHUDAmmo()
 	}
 }
 
+void AWeapon::SetHUDWeaponType()
+{
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if (BlasterOwnerCharacter)
+	{
+		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
+		if (BlasterOwnerController)
+		{
+			BlasterOwnerController->SetHUDWeaponType(GetWeaponType(), true);
+		}
+	}
+}
+
 
 void AWeapon::SpendRound()
 {
@@ -125,6 +138,7 @@ void AWeapon::OnRep_Owner()
 	else
 	{
 		SetHUDAmmo();
+		SetHUDWeaponType();
 	}
 }
 
@@ -223,6 +237,7 @@ void AWeapon::Fire(const FVector& HitTarget)
 
 void AWeapon::Dropped()
 {
+	BlasterOwnerController->SetHUDWeaponType(GetWeaponType(), false);
 	SetWeaponState(EWeaponState::EWS_Dropped);
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);
