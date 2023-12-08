@@ -21,6 +21,7 @@ public:
 	void SetHUDWeaponAmmo(int32 Ammo);
 	void SetHUDCarriedAmmo(int32 Ammo);
 	void SetHUDMatchCountdown(float CountdownTime);
+	void UpdateHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);
 	void SetHUDWeaponType(EWeaponType CurrentWeaponType, bool bIsVisible);
 	void SetHUDElimmedText(bool isShown);
@@ -34,6 +35,7 @@ public:
 
 	void OnMatchStateSet(FName State);
 	void HandleMatchHasStarted();
+	void HandleMatchCooldown();
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -68,14 +70,18 @@ protected:
 
 	// Handles relaying game mode information when a client joins the game
 	UFUNCTION(Client, Reliable)
-	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime);
+	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
 
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode;
+
 	float LevelStartingTime = 0.f;
 	float MatchTime = 0.f;
 	float WarmupTime = 0.f;
+	float CooldownTime = 0.f;
 	uint32 CountdownInt = 0;
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
