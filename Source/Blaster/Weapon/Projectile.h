@@ -39,10 +39,10 @@ protected:
 	UParticleSystem* ImpactParticles;
 
 	bool bHitAPlayer;
-private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
+private:
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* Tracer;
