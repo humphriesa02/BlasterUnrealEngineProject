@@ -25,6 +25,8 @@ public:
 	void SetHUDAnnouncementCountdown(float CountdownTime);
 	void SetHUDWeaponType(EWeaponType CurrentWeaponType, bool bIsVisible);
 	void SetHUDElimmedText(bool isShown);
+	void SetHUDGrenades(int32 Grenades);
+
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -99,6 +101,7 @@ private:
 	float HUDMaxHealth;
 	float HUDScore;
 	int32 HUDDefeats;
+	int32 HUDGrenades;
 
 	TArray<FString> ElimmedTextArray = {
 		TEXT("Get PWNED, Nerd!"),
