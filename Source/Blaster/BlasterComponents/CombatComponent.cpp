@@ -23,6 +23,7 @@ UCombatComponent::UCombatComponent()
 
 	BaseWalkSpeed = 600.f;
 	AimWalkSpeed = 450.f;
+	MinigunWalkSpeed = 300.f;
 	bIsAimingAtEnemy = false;
 }
 
@@ -76,10 +77,24 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
+	ServerFireButtonPressed(bPressed);
 	
 	if (bFireButtonPressed)
 	{
 		Fire();
+	}
+
+	if (EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Minigun)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = bFireButtonPressed ? MinigunWalkSpeed : BaseWalkSpeed;
+	}
+}
+
+void UCombatComponent::ServerFireButtonPressed_Implementation(bool bPressed)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Minigun)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = bPressed ? MinigunWalkSpeed : BaseWalkSpeed;
 	}
 }
 
@@ -185,7 +200,12 @@ void UCombatComponent::DropEquippedWeapon()
 {
 	if (EquippedWeapon)
 	{
+		if (EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Minigun)
+		{
+			Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+		}
 		EquippedWeapon->Dropped();
+		
 	}
 }
 
@@ -706,4 +726,5 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSniperAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeLauncherAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_Minigun, StartingMinigunAmmo);
 }

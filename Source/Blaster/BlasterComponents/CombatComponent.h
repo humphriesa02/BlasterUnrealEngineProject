@@ -27,6 +27,9 @@ public:
 
 	void FireButtonPressed(bool bPressed);
 
+	UFUNCTION(Server, Reliable)
+	void ServerFireButtonPressed(bool bPressed);
+
 	UFUNCTION(BlueprintCallable)
 	void ShotgunShellReload();
 	void JumpToShotgunEnd();
@@ -107,6 +110,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
 
+	UPROPERTY(EditAnywhere)
+	float MinigunWalkSpeed;
+
 	bool bFireButtonPressed;
 
 	/**
@@ -183,6 +189,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 StartingGrenadeLauncherAmmo = 0;
 
+	UPROPERTY(EditAnywhere)
+	int32 StartingMinigunAmmo = 0;
+
 	void InitializeCarriedAmmo();
 
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
@@ -206,6 +215,5 @@ private:
 	void UpdateHUDGrenades();
 public:	
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
-
-		
+	FORCEINLINE bool GetFireButtonPressed() const { return bFireButtonPressed; }
 };

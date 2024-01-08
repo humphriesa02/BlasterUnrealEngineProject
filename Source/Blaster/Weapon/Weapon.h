@@ -101,6 +101,11 @@ protected:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
 
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter;
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterOwnerController;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
@@ -134,11 +139,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity;
-
-	UPROPERTY()
-	class ABlasterCharacter* BlasterOwnerCharacter;
-	UPROPERTY()
-	class ABlasterPlayerController* BlasterOwnerController;
 
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
