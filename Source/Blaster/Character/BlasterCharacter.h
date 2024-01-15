@@ -8,6 +8,8 @@
 #include "Blaster/Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
 #include "Blaster/BlasterTypes/CombatState.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
@@ -43,6 +45,9 @@ public:
 
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
+
+	// Used to spawn particles around the player when they overlap with a pickup
+	void SpawnPickupParticles(UNiagaraSystem* PickupEffect);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -160,8 +165,8 @@ private:
 	float MaxShield = 100.f;
 
 	// Current
-	UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "Player Stats")
-	float Shield = 100.f;
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, EditAnywhere, Category = "Player Stats")
+	float Shield = 0.f;
 
 	// Called to replicate the shield variable
 	UFUNCTION()
@@ -238,6 +243,9 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetShield() const { return Shield; }
+	FORCEINLINE void SetShield(float Amount) { Shield = Amount; }
+	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }

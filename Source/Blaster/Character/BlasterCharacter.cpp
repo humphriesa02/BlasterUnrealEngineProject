@@ -22,6 +22,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Blaster/Weapon/WeaponTypes.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -771,6 +772,22 @@ void ABlasterCharacter::UpdateHUDShield()
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDShield(Shield, MaxShield);
+	}
+}
+
+void ABlasterCharacter::SpawnPickupParticles(UNiagaraSystem* PickupEffect)
+{
+	if (PickupEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAttached(
+			PickupEffect,
+			GetMesh(),
+			"",
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
 	}
 }
 
