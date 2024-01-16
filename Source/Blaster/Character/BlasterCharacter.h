@@ -45,9 +45,6 @@ public:
 
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
-
-	// Used to spawn particles around the player when they overlap with a pickup
-	void SpawnPickupParticles(UNiagaraSystem* PickupEffect);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

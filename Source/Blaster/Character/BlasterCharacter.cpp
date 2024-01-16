@@ -775,22 +775,6 @@ void ABlasterCharacter::UpdateHUDShield()
 	}
 }
 
-void ABlasterCharacter::SpawnPickupParticles(UNiagaraSystem* PickupEffect)
-{
-	if (PickupEffect)
-	{
-		UNiagaraFunctionLibrary::SpawnSystemAttached(
-			PickupEffect,
-			GetMesh(),
-			"",
-			GetActorLocation(),
-			GetActorRotation(),
-			EAttachLocation::KeepWorldPosition,
-			false
-		);
-	}
-}
-
 void ABlasterCharacter::PollInit()
 {
 	if (BlasterPlayerState == nullptr)
