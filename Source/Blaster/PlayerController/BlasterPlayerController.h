@@ -108,6 +108,10 @@ private:
 	float HUDShield;
 	bool bInitializeShield = false;
 	float HUDMaxShield;
+	float HUDCarriedAmmo;
+	bool bInitializeCarriedAmmo = false;
+	float HUDWeaponAmmo;
+	bool bInitializeWeaponAmmo = false;
 
 	TArray<FString> ElimmedTextArray = {
 		TEXT("Get PWNED, Nerd!"),
