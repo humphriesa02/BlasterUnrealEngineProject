@@ -509,15 +509,7 @@ void ABlasterCharacter::EquipButtonPressed()
 	if (bDisableGameplay) return;
 	if (Combat)
 	{
-		// If on the server equip the weapon directly
-		if (HasAuthority())
-		{
-			Combat->EquipWeapon(OverlappingWeapon);
-		}
-		// If not the server then call the RPC in order to tell the server we are equipping
-		else {
-			ServerEquipButtonPressed();
-		}
+		ServerEquipButtonPressed();
 	}
 }
 
@@ -830,6 +822,7 @@ void ABlasterCharacter::PollInit()
 		{
 			UpdateHUDHealth();
 			UpdateHUDShield();
+			UpdateHUDAmmo();
 		}
 	}
 }
