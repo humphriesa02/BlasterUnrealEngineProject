@@ -193,6 +193,7 @@ void ABlasterPlayerController::SetHUDWeaponAmmo(int32 Ammo)
 
 void ABlasterPlayerController::SetHUDCarriedAmmo(int32 Ammo)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Setting HUD Carried Ammo"));
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 	bool bHUDValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
@@ -280,6 +281,7 @@ void ABlasterPlayerController::SetHUDWeaponType(EWeaponType CurrentWeaponType, b
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->WeaponTypeText;
 	FString WeaponTypeName;
+
 	if (bHUDValid)
 	{
 		switch (CurrentWeaponType)
@@ -287,12 +289,38 @@ void ABlasterPlayerController::SetHUDWeaponType(EWeaponType CurrentWeaponType, b
 		case EWeaponType::EWT_AssaultRifle:
 			WeaponTypeName = TEXT("Assault Rifle");
 			break;
+		case EWeaponType::EWT_Pistol:
+			WeaponTypeName = TEXT("Pistol");
+			break;
+		case EWeaponType::EWT_SubmachineGun:
+			WeaponTypeName = TEXT("Submachine Gun");
+			break;
+		case EWeaponType::EWT_RocketLauncher:
+			WeaponTypeName = TEXT("Rocket Launcher");
+			break;
+		case EWeaponType::EWT_GrenadeLauncher:
+			WeaponTypeName = TEXT("Grenade Launcher");
+			break;
+		case EWeaponType::EWT_Shotgun:
+			WeaponTypeName = TEXT("Shotgun");
+			break;
+		case EWeaponType::EWT_SniperRifle:
+			WeaponTypeName = TEXT("Sniper Rifle");
+			break;
+		case EWeaponType::EWT_Minigun:
+			WeaponTypeName = TEXT("Minigun");
+			break;
 		case EWeaponType::EWT_MAX:
 			WeaponTypeName = TEXT("UNDEFINED");
 			break;
 		}
 		BlasterHUD->CharacterOverlay->WeaponTypeText->SetVisibility(bIsVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 		BlasterHUD->CharacterOverlay->WeaponTypeText->SetText(FText::FromString(WeaponTypeName));
+	}
+	else
+	{
+		bInitializeWeaponTypeName = true;
+		HUDWeaponType = CurrentWeaponType;
 	}
 }
 
@@ -390,6 +418,7 @@ void ABlasterPlayerController::PollInit()
 				if (bInitializeDefeats) SetHUDDefeats(HUDDefeats);
 				if (bInitializeCarriedAmmo) SetHUDCarriedAmmo(HUDCarriedAmmo);
 				if (bInitializeWeaponAmmo) SetHUDWeaponAmmo(HUDWeaponAmmo);
+				if (bInitializeWeaponTypeName) SetHUDWeaponType(HUDWeaponType, true);
 
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 				if (BlasterCharacter && BlasterCharacter->GetCombat())

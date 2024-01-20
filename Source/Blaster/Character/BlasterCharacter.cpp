@@ -303,6 +303,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
 	PlayerInputComponent->BindAction("Drop", IE_Pressed, this, &ABlasterCharacter::DropButtonPressed);
 	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ABlasterCharacter::GrenadeButtonPressed);
+	PlayerInputComponent->BindAction("SwapWeapon", IE_Pressed, this, &ABlasterCharacter::SwapWeaponButtonPressed);
 }
 
 // Set up our connection to components
@@ -425,6 +426,14 @@ void ABlasterCharacter::GrenadeButtonPressed()
 	if (Combat)
 	{
 		Combat->ThrowGrenade();
+	}
+}
+
+void ABlasterCharacter::SwapWeaponButtonPressed()
+{
+	if (Combat && Combat->ShouldSwapWeapons())
+	{
+		Combat->SwapWeapons();
 	}
 }
 
@@ -786,6 +795,15 @@ void ABlasterCharacter::UpdateHUDAmmo()
 	}
 }
 
+void ABlasterCharacter::UpdateHUDWeaponType()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController && Combat && Combat->EquippedWeapon)
+	{
+		BlasterPlayerController->SetHUDWeaponType(Combat->EquippedWeapon->GetWeaponType(), true);
+	}
+}
+
 void ABlasterCharacter::SpawnDefaultWeapon()
 {
 	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
@@ -823,6 +841,7 @@ void ABlasterCharacter::PollInit()
 			UpdateHUDHealth();
 			UpdateHUDShield();
 			UpdateHUDAmmo();
+			UpdateHUDWeaponType();
 		}
 	}
 }

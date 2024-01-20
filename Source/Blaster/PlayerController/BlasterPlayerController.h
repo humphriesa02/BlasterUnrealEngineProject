@@ -112,6 +112,8 @@ private:
 	bool bInitializeCarriedAmmo = false;
 	float HUDWeaponAmmo;
 	bool bInitializeWeaponAmmo = false;
+	EWeaponType HUDWeaponType;
+	bool bInitializeWeaponTypeName = false;
 
 	TArray<FString> ElimmedTextArray = {
 		TEXT("Get PWNED, Nerd!"),
