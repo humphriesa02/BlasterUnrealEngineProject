@@ -204,7 +204,6 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::SwapWeapons()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Swapping Weapons"));
 	// Weapon pointer swap
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;

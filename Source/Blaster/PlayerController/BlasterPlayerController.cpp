@@ -193,7 +193,6 @@ void ABlasterPlayerController::SetHUDWeaponAmmo(int32 Ammo)
 
 void ABlasterPlayerController::SetHUDCarriedAmmo(int32 Ammo)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Setting HUD Carried Ammo"));
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 	bool bHUDValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&

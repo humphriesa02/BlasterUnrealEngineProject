@@ -159,7 +159,6 @@ void AWeapon::OnRep_Owner()
 		if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetEquippedWeapon() && BlasterOwnerCharacter->GetEquippedWeapon() == this)
 		{
 			SetHUDAmmo();
-			SetHUDWeaponType();
 		}
 	}
 }
@@ -301,7 +300,6 @@ void AWeapon::Fire(const FVector& HitTarget)
 
 void AWeapon::Dropped()
 {
-	BlasterOwnerController->SetHUDWeaponType(GetWeaponType(), false);
 	SetWeaponState(EWeaponState::EWS_Dropped);
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);

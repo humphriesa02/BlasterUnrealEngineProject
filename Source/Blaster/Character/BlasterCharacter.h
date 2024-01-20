@@ -73,6 +73,8 @@ protected:
 	void PlayHitReactMontage();
 	void GrenadeButtonPressed();
 	void SwapWeaponButtonPressed();
+	void DropOrDestroyWeapon(AWeapon* Weapon);
+	void DropOrDestroyWeapons();
 
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
@@ -104,6 +106,9 @@ private:
 	// RPC function
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSwapWeaponButtonPressed();
 
 	float AO_Yaw;
 	float InterpAO_Yaw;
