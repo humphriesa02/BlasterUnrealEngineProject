@@ -74,6 +74,11 @@ protected:
 	// Handles relaying game mode information when a client joins the game
 	UFUNCTION(Client, Reliable)
 	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
+
+	void HighPingWarning();
+	void StopHighPingWarning();
+	void CheckPing(float DeltaTime);
+	void DisplayPing();
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
@@ -114,6 +119,25 @@ private:
 	bool bInitializeWeaponAmmo = false;
 	EWeaponType HUDWeaponType;
 	bool bInitializeWeaponTypeName = false;
+
+	/*
+	* High Ping
+	*/
+
+	float HighPingRunningTime = 0.f;
+
+	// How long we display the high ping warning
+	UPROPERTY(EditAnywhere)
+	float HighPingDuration = 5.0f;
+
+	float PingAnimationRunningTime = 0.f;
+
+	// How often we check for high ping
+	UPROPERTY(EditAnywhere)
+	float CheckPingFrequency = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	float HighPingThreshold = 60.f;
 
 	TArray<FString> ElimmedTextArray = {
 		TEXT("Get PWNED, Nerd!"),
