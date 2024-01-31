@@ -525,8 +525,9 @@ void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeO
 {
 	// How much time has passed since client has sent RPC
 	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
+	SingleTripTime = 0.5f * RoundTripTime;
 	// Current time of server plus the time it took the rpcs to reach us
-	float CurrentServerTime = TimeServerReceivedClientRequest + (0.5f * RoundTripTime);
+	float CurrentServerTime = TimeServerReceivedClientRequest + SingleTripTime;
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }
 
