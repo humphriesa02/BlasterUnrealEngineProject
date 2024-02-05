@@ -12,6 +12,8 @@
 #include "NiagaraFunctionLibrary.h"
 #include "BlasterCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
+
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
@@ -35,10 +37,10 @@ public:
 	void PlaySwapMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
-	void Elim();
+	void Elim(bool bPlayerLeftGame);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastElim();
+	void MulticastElim(bool bPlayerLeftGame);
 
 	virtual void Destroyed() override;
 
@@ -60,6 +62,11 @@ public:
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 
 	bool bFinishedSwapping = false;
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame();
+
+	FOnLeftGame OnLeftGame;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -267,6 +274,8 @@ private:
 	FTimerHandle ElimTimer;
 
 	void ElimTimerFinished();
+
+	bool bLeftGame = false;
 
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay = 3.f;
