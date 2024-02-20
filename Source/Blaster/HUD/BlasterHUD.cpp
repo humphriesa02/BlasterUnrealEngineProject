@@ -26,6 +26,10 @@ void ABlasterHUD::AddCharacterOverlay()
 	}
 }
 
+void ABlasterHUD::AddChatBox()
+{
+}
+
 void ABlasterHUD::AddAnnouncement()
 {
 	APlayerController* PlayerController = GetOwningPlayerController();

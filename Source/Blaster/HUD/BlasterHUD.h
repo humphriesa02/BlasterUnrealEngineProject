@@ -36,6 +36,10 @@ public:
 	TSubclassOf<class UUserWidget> CharacterOverlayClass;
 	void AddCharacterOverlay();
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UChatBox> ChatBoxClass;
+	void AddChatBox();
+
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
 
