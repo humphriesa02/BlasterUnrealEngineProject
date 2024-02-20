@@ -3,9 +3,11 @@
 
 #include "BlasterHUD.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
 #include "CharacterOverlay.h"
 #include "Announcement.h"
 #include "ElimAnnouncement.h"
+#include "ChatMessage.h"
 #include "Components/HorizontalBox.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
@@ -24,10 +26,6 @@ void ABlasterHUD::AddCharacterOverlay()
 		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
 	}
-}
-
-void ABlasterHUD::AddChatBox()
-{
 }
 
 void ABlasterHUD::AddAnnouncement()
@@ -84,12 +82,66 @@ void ABlasterHUD::AddElimAnnouncement(FString Attacker, FString Victim)
 	}
 }
 
+void ABlasterHUD::AddChatMessage(FString MessageText)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Adding Chat Message"));
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (OwningPlayer && ChatMessageClass)
+	{
+		UChatMessage* ChatMessageWidget = CreateWidget<UChatMessage>(OwningPlayer, ChatMessageClass);
+		if (ChatMessageWidget)
+		{
+			ChatMessageWidget->SetChatMessageText(MessageText);
+			APlayerState* PlayerState = OwningPlayer->PlayerState;
+			if (PlayerState)
+			{
+				FString PlayerName = PlayerState->GetPlayerName();
+				ChatMessageWidget->SetChatUserName(PlayerName);
+			}
+			ChatMessageWidget->AddToViewport();
+			ChatMessages.Add(ChatMessageWidget);
+
+			for (auto Msg : ChatMessages)
+			{
+				if (Msg && Msg->ChatBoxContainer)
+				{
+					UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Msg->ChatBoxContainer);
+					if (CanvasSlot)
+					{
+						FVector2D Position = CanvasSlot->GetPosition();
+						FVector2D NewPosition(
+							CanvasSlot->GetPosition().X,
+							Position.Y - CanvasSlot->GetSize().Y);
+						CanvasSlot->SetPosition(NewPosition);
+					}
+				}
+			}
+
+
+
+			FTimerHandle ChatMsgTimer;
+			FTimerDelegate ChatMsgDelegate;
+			ChatMsgDelegate.BindUFunction(this, FName("ChatTimerFinished"), ChatMessageWidget);
+			GetWorldTimerManager().SetTimer(
+				ChatMsgTimer,
+				ChatMsgDelegate,
+				ChatDisplayTime,
+				false
+			);
+		}
+	}
+}
+
 void ABlasterHUD::ElimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove)
 {
 	if (MsgToRemove)
 	{
 		MsgToRemove->RemoveFromParent();
 	}
+}
+
+void ABlasterHUD::ChatTimerFinished()
+{
 }
 
 void ABlasterHUD::DrawHUD()

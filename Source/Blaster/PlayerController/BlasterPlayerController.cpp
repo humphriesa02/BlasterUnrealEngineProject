@@ -17,11 +17,17 @@
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/Image.h"
 #include "Blaster/HUD/LeaveGame.h"
+#include "Blaster/HUD/ChatBox.h"
 
 
 void ABlasterPlayerController::BroadcastElim(APlayerState* Attacker, APlayerState* Victim)
 {
 	ClientElimAnnouncement(Attacker, Victim);
+}
+
+void ABlasterPlayerController::BroadCastChatMessage(FString MessageText)
+{
+	MulticastChatMessage(MessageText);
 }
 
 void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
@@ -54,6 +60,16 @@ void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerStat
 			}
 			BlasterHUD->AddElimAnnouncement(Attacker->GetPlayerName(), Victim->GetPlayerName());
 		}
+	}
+}
+
+void ABlasterPlayerController::MulticastChatMessage_Implementation(const FString& Message)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	if (BlasterHUD)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerController Chat Sent"));
+		BlasterHUD->AddChatMessage(Message);
 	}
 }
 
@@ -160,6 +176,28 @@ void ABlasterPlayerController::ShowReturnToMainMenu()
 		else
 		{
 			ReturnToMainMenu->MenuTearDown();
+		}
+	}
+}
+
+void ABlasterPlayerController::ShowChatBox()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ShowingChatBox"));
+	if (ChatBoxWidget == nullptr) return;
+	if (ChatBox == nullptr)
+	{
+		ChatBox = CreateWidget<UChatBox>(this, ChatBoxWidget);
+	}
+	if (ChatBox)
+	{
+		bChatBoxOpen = !bChatBoxOpen;
+		if (bChatBoxOpen)
+		{
+			ChatBox->MenuSetup();
+		}
+		else
+		{
+			ChatBox->MenuTearDown();
 		}
 	}
 }
@@ -593,6 +631,7 @@ void ABlasterPlayerController::SetupInputComponent()
 	if (InputComponent == nullptr) return;
 
 	InputComponent->BindAction("Quit", IE_Pressed, this, &ABlasterPlayerController::ShowReturnToMainMenu);
+	InputComponent->BindAction("Chat", IE_Pressed, this, &ABlasterPlayerController::ShowChatBox);
 }
 
 void ABlasterPlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)

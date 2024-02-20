@@ -15,6 +15,12 @@ class BLASTER_API UChatBox : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	void MenuSetup();
+	void MenuTearDown();
+
+private:
+	UFUNCTION()
+	void ChatMessageSubmitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 	UPROPERTY(meta = (BindWidget))
 	class UScrollBox* ChatScrollBox;
@@ -24,4 +30,7 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* ChatTextBox;
+
+	UPROPERTY()
+	class APlayerController* PlayerController;
 };

@@ -36,10 +36,6 @@ public:
 	TSubclassOf<class UUserWidget> CharacterOverlayClass;
 	void AddCharacterOverlay();
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UChatBox> ChatBoxClass;
-	void AddChatBox();
-
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
 
@@ -47,6 +43,7 @@ public:
 	TSubclassOf<class UUserWidget> AnnouncementClass;
 	void AddAnnouncement();
 	void AddElimAnnouncement(FString Attacker, FString Victim);
+	void AddChatMessage(FString MessageText);
 
 	UPROPERTY()
 	class UAnnouncement* Announcement;
@@ -75,6 +72,18 @@ private:
 
 	UPROPERTY()
 	TArray<UElimAnnouncement*> ElimMessages;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UChatMessage> ChatMessageClass;
+
+	UPROPERTY(EditAnywhere)
+	float ChatDisplayTime = 2.5f;
+
+	UFUNCTION()
+	void ChatTimerFinished();
+
+	UPROPERTY()
+	TArray<UChatMessage*> ChatMessages;
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 };

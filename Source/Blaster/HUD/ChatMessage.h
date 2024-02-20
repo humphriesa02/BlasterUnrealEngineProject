@@ -21,8 +21,11 @@ public:
 	void SetChatMessageText(FString Message);
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* ChatUserNameBox;
+	class UTextBlock* ChatUserNameText;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* ChatMessageBox;
+	class UHorizontalBox* ChatBoxContainer;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ChatMessageText;
 };

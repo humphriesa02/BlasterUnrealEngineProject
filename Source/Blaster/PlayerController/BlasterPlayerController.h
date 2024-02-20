@@ -47,6 +47,10 @@ public:
 	FHighPingDelegate HighPingDelegate;
 
 	void BroadcastElim(APlayerState* Attacker, APlayerState* Victim);
+
+	bool bChatBoxOpen = false;
+
+	void BroadCastChatMessage(FString MessageText);
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -92,8 +96,13 @@ protected:
 
 	void ShowReturnToMainMenu();
 
+	void ShowChatBox();
+
 	UFUNCTION(Client, Reliable)
 	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastChatMessage(const FString& Message);
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
@@ -104,9 +113,15 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = HUD)
 	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<class UUserWidget> ChatBoxWidget;
 	
 	UPROPERTY()
 	class ULeaveGame* ReturnToMainMenu;
+
+	UPROPERTY()
+	class UChatBox* ChatBox;
 
 	bool bReturnToMainMenuOpen = false;
 
