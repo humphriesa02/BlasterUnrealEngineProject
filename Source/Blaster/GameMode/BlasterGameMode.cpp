@@ -182,3 +182,17 @@ void ABlasterGameMode::PlayerLeftGame(ABlasterPlayerState* PlayerLeaving)
 		CharacterLeaving->Elim(true);
 	}
 }
+
+// NOT AN RPC - Should only be called by Server
+// Loops through all players of the game, broadcasting a message to their screens.
+void ABlasterGameMode::ServerDisplayMessageOnAllScreens(const FString& Message)
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
+		if (BlasterPlayer)
+		{
+			BlasterPlayer->BroadCastChatMessage(Message);
+		}
+	}
+}

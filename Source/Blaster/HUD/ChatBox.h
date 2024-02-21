@@ -23,9 +23,6 @@ private:
 	void ChatMessageSubmitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 	UPROPERTY(meta = (BindWidget))
-	class UScrollBox* ChatScrollBox;
-
-	UPROPERTY(meta = (BindWidget))
 	class UHorizontalBox* ChatBoxContainer;
 
 	UPROPERTY(meta = (BindWidget))
@@ -33,4 +30,14 @@ private:
 
 	UPROPERTY()
 	class APlayerController* PlayerController;
+	
+	UFUNCTION()
+	bool ValidateText(FString CommittedText);
+
+	bool HasExplicitWords(const FString& Message);
+
+	int32 MaxMessageLength = 50;
+
+	UFUNCTION()
+	FString ReplaceWord(const FString& OriginalMessage, const FString& WordToReplace, const FString& ReplacementWord);
 };

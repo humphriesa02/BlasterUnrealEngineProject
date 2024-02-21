@@ -84,7 +84,6 @@ void ABlasterHUD::AddElimAnnouncement(FString Attacker, FString Victim)
 
 void ABlasterHUD::AddChatMessage(FString MessageText)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Adding Chat Message"));
 	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
 	if (OwningPlayer && ChatMessageClass)
 	{
@@ -140,8 +139,12 @@ void ABlasterHUD::ElimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove)
 	}
 }
 
-void ABlasterHUD::ChatTimerFinished()
+void ABlasterHUD::ChatTimerFinished(UChatMessage* MsgToRemove)
 {
+	if (MsgToRemove)
+	{
+		MsgToRemove->RemoveFromParent();
+	}
 }
 
 void ABlasterHUD::DrawHUD()

@@ -80,7 +80,7 @@ private:
 	float ChatDisplayTime = 2.5f;
 
 	UFUNCTION()
-	void ChatTimerFinished();
+	void ChatTimerFinished(UChatMessage* MsgToRemove);
 
 	UPROPERTY()
 	TArray<UChatMessage*> ChatMessages;

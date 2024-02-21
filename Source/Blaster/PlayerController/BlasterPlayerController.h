@@ -51,6 +51,9 @@ public:
 	bool bChatBoxOpen = false;
 
 	void BroadCastChatMessage(FString MessageText);
+
+	UFUNCTION(Server, Reliable)
+	void AskServerGameModeToDisplayMessage(const FString& Message);
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -101,8 +104,8 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastChatMessage(const FString& Message);
+	UFUNCTION(Client, Reliable)
+	void ClientChatMessage(const FString& Message);
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;

@@ -25,6 +25,7 @@ public:
 	virtual void PlayerEliminated(class ABlasterCharacter* ElimmedCharacter, class ABlasterPlayerController* VictimController, class ABlasterPlayerController* AttackerController);
 	virtual void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
 	void PlayerLeftGame(class ABlasterPlayerState* PlayerLeaving);
+	void ServerDisplayMessageOnAllScreens(const FString& Message);
 
 	// Time it takes to warm up, before game begins
 	UPROPERTY(EditDefaultsOnly)

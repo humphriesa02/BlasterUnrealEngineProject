@@ -67,27 +67,23 @@ void UChatBox::ChatMessageSubmitted(const FText& Text, ETextCommit::Type CommitM
 	// Your implementation here
 	FString CommittedText = Text.ToString();
 
+	ABlasterPlayerController* FirstPlayerController = Cast<ABlasterPlayerController>(GetOwningPlayer());
 
-	UWorld* World = GetWorld();
-	if (World)
+	// Determine the commit method and handle accordingly
+	if (FirstPlayerController)
 	{
-		ABlasterPlayerController* FirstPlayerController = Cast<ABlasterPlayerController>(GetOwningPlayer());
-
-		// Determine the commit method and handle accordingly
-		if (FirstPlayerController)
+		switch (CommitMethod)
 		{
-			switch (CommitMethod)
-			{
 			case ETextCommit::OnEnter:
-				for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+				if (ValidateText(CommittedText))
 				{
-					ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
-					if (BlasterPlayer)
-					{
-						UE_LOG(LogTemp, Warning, TEXT("Chat iterated over"));
-						BlasterPlayer->BroadCastChatMessage(CommittedText);
-					}
+					FirstPlayerController->AskServerGameModeToDisplayMessage(CommittedText);
 				}
+				else
+				{
+					FirstPlayerController->AskServerGameModeToDisplayMessage(FString("I tried to say a bad word. I humbly apologize"));
+				}
+				
 				break;
 			case ETextCommit::OnUserMovedFocus:
 				FirstPlayerController->bChatBoxOpen = false;
@@ -97,8 +93,66 @@ void UChatBox::ChatMessageSubmitted(const FText& Text, ETextCommit::Type CommitM
 				FirstPlayerController->bChatBoxOpen = false;
 				MenuTearDown();
 				break;
-			}
 		}
 	}
 	ChatTextBox->SetText(FText::FromString(TEXT("")));
+}
+
+bool UChatBox::ValidateText(FString CommittedText)
+{
+	if (CommittedText.IsEmpty())
+	{
+		return false;
+	}
+
+	if (CommittedText.Len() > MaxMessageLength)
+	{
+		return false;
+	}
+
+	for (TCHAR Char : CommittedText)
+	{
+		if (!FChar::IsAlnum(Char) && Char != ' ')
+		{
+			return false;
+		}
+	}
+
+	if (CommittedText.Contains("Dillon"))
+	{
+		CommittedText = ReplaceWord(CommittedText, "Dillon", "Loser");
+	}
+
+	if (HasExplicitWords(CommittedText))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool UChatBox::HasExplicitWords(const FString& Message)
+{
+	TArray<FString> BadWords = { "ez", "Easy", "easy", "Nigger", "Nigga" };
+
+	for (const FString& BadWord : BadWords)
+	{
+		if (Message.Contains(BadWord, ESearchCase::IgnoreCase))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+FString UChatBox::ReplaceWord(const FString& OriginalMessage, const FString& WordToReplace, const FString& ReplacementWord)
+{
+	// Make a copy of the original message to perform the replacement
+	FString ModifiedMessage = OriginalMessage;
+
+	// Replace the word if it exists in the message
+	ModifiedMessage.ReplaceInline(*WordToReplace, *ReplacementWord, ESearchCase::IgnoreCase);
+
+	return ModifiedMessage;
 }

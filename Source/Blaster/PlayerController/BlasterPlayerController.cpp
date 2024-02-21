@@ -27,7 +27,7 @@ void ABlasterPlayerController::BroadcastElim(APlayerState* Attacker, APlayerStat
 
 void ABlasterPlayerController::BroadCastChatMessage(FString MessageText)
 {
-	MulticastChatMessage(MessageText);
+	ClientChatMessage(MessageText);
 }
 
 void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
@@ -63,13 +63,23 @@ void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerStat
 	}
 }
 
-void ABlasterPlayerController::MulticastChatMessage_Implementation(const FString& Message)
+void ABlasterPlayerController::ClientChatMessage_Implementation(const FString& Message)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 	if (BlasterHUD)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PlayerController Chat Sent"));
 		BlasterHUD->AddChatMessage(Message);
+	}
+}
+
+// A client first "asks" the server to show a new message to all players
+void ABlasterPlayerController::AskServerGameModeToDisplayMessage_Implementation(const FString& Message)
+{
+	ABlasterGameMode* GameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	if (GameMode)
+	{
+		GameMode->ServerDisplayMessageOnAllScreens(Message);
 	}
 }
 
