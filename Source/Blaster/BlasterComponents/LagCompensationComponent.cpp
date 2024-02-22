@@ -113,6 +113,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 
 FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime)
 {
+	if (HitCharacter == nullptr) return FServerSideRewindResult();
 	FFramePackage CurrentFrame;
 	// Store all locations of the boxes in the current frame to move them back later
 	CacheBoxPositions(HitCharacter, CurrentFrame);

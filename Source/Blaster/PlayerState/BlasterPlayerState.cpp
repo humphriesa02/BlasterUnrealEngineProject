@@ -12,6 +12,7 @@ void ABlasterPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 	DOREPLIFETIME(ABlasterPlayerState, Defeats);
 	DOREPLIFETIME(ABlasterPlayerState, IsElimmedTextShown);
+	DOREPLIFETIME(ABlasterPlayerState, Team);
 }
 
 void ABlasterPlayerState::AddToScore(float ScoreAmount)
@@ -89,7 +90,6 @@ void ABlasterPlayerState::ShowElimmedText(bool isShown)
 	}
 }
 
-
 void ABlasterPlayerState::OnRep_IsElimmedTextShown()
 {
 	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
@@ -101,5 +101,25 @@ void ABlasterPlayerState::OnRep_IsElimmedTextShown()
 			Controller->SetHUDElimmedText(IsElimmedTextShown);
 			Controller->SetHUDWeaponType(EWeaponType::EWT_MAX, false);
 		}
+	}
+}
+
+void ABlasterPlayerState::SetTeam(ETeam TeamToSet)
+{
+	Team = TeamToSet;
+
+	ABlasterCharacter* BCharacter = Cast<ABlasterCharacter>(GetPawn());
+	if (BCharacter)
+	{
+		BCharacter->SetTeamColor(Team);
+	}
+}
+
+void ABlasterPlayerState::OnRep_Team()
+{
+	ABlasterCharacter* BCharacter = Cast<ABlasterCharacter>(GetPawn());
+	if (BCharacter)
+	{
+		BCharacter->SetTeamColor(Team);
 	}
 }
