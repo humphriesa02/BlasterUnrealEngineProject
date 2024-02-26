@@ -24,6 +24,9 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 // After this is complete the delegate OnCreateSessionComplete is called
 void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FString MatchType)
 {
+	DesiredNumPublicConnections = NumPublicConnections;
+	DesiredMatchType = MatchType;
+
 	// Check if SessionInterface is a valid pointer, if not return
 	if (!SessionInterface.IsValid())
 	{

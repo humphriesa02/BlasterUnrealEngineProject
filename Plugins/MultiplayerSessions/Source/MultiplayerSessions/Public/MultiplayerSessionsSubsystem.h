@@ -90,4 +90,12 @@ private:
 	bool bCreateSessionOnDestroy{ false };
 	int32 LastNumPublicConnections;
 	FString LastMatchType;
+
+	int32 DesiredNumPublicConnections{};
+
+	FString DesiredMatchType{};
+
+public:
+	FORCEINLINE int32 GetDesiredNumPublicConnections() const { return DesiredNumPublicConnections; }
+	FORCEINLINE FString GetDesiredMatchType() const { return DesiredMatchType; }
 };
