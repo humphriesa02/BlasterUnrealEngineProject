@@ -43,7 +43,7 @@ public:
 	TSubclassOf<class UUserWidget> AnnouncementClass;
 	void AddAnnouncement();
 	void AddElimAnnouncement(FString Attacker, FString Victim);
-	void AddChatMessage(FString MessageText);
+	void AddChatMessage(const FString& MessageText, const FString& UserName="Error");
 
 	UPROPERTY()
 	class UAnnouncement* Announcement;

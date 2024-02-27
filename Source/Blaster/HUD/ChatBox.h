@@ -34,7 +34,7 @@ private:
 	UFUNCTION()
 	bool ValidateText(FString CommittedText);
 
-	bool HasExplicitWords(const FString& Message);
+	bool HasExplicitWords(FString Message);
 
 	int32 MaxMessageLength = 50;
 

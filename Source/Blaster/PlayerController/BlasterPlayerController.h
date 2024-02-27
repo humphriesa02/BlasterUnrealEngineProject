@@ -54,10 +54,10 @@ public:
 
 	bool bChatBoxOpen = false;
 
-	void BroadCastChatMessage(FString MessageText);
+	void BroadCastChatMessage(const FString& MessageText, const FString& UserName);
 
 	UFUNCTION(Server, Reliable)
-	void AskServerGameModeToDisplayMessage(const FString& Message);
+	void AskServerGameModeToDisplayMessage(const FString& Message, const FString& UserName);
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -109,7 +109,7 @@ protected:
 	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
 	UFUNCTION(Client, Reliable)
-	void ClientChatMessage(const FString& Message);
+	void ClientChatMessage(const FString& Message, const FString& UserName);
 
 	UPROPERTY(ReplicatedUsing = OnRep_ShowTeamScores)
 	bool bShowTeamScores = false;

@@ -13,6 +13,7 @@ void ABlasterPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(ABlasterPlayerState, Defeats);
 	DOREPLIFETIME(ABlasterPlayerState, IsElimmedTextShown);
 	DOREPLIFETIME(ABlasterPlayerState, Team);
+	DOREPLIFETIME(ABlasterPlayerState, ShownWeaponType);
 }
 
 void ABlasterPlayerState::AddToScore(float ScoreAmount)
@@ -85,7 +86,6 @@ void ABlasterPlayerState::ShowElimmedText(bool isShown)
 		if (Controller)
 		{
 			Controller->SetHUDElimmedText(IsElimmedTextShown);
-			Controller->SetHUDWeaponType(EWeaponType::EWT_MAX, false);
 		}
 	}
 }
@@ -99,7 +99,47 @@ void ABlasterPlayerState::OnRep_IsElimmedTextShown()
 		if (Controller)
 		{
 			Controller->SetHUDElimmedText(IsElimmedTextShown);
-			Controller->SetHUDWeaponType(EWeaponType::EWT_MAX, false);
+		}
+	}
+}
+
+void ABlasterPlayerState::ShowWeaponType(EWeaponType WeaponType)
+{
+	ShownWeaponType = WeaponType;
+	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			if (WeaponType != EWeaponType::EWT_MAX)
+			{
+				Controller->SetHUDWeaponType(WeaponType, true);
+			}
+			else
+			{
+				Controller->SetHUDWeaponType(WeaponType, false);
+			}
+		}
+	}
+}
+
+void ABlasterPlayerState::OnRep_ShownWeaponType()
+{
+	Character = Character == nullptr ? Cast<ABlasterCharacter>(GetPawn()) : Character;
+	if (Character)
+	{
+		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			if (ShownWeaponType != EWeaponType::EWT_MAX)
+			{
+				Controller->SetHUDWeaponType(ShownWeaponType, true);
+			}
+			else
+			{
+				Controller->SetHUDWeaponType(ShownWeaponType, false);
+			}
 		}
 	}
 }

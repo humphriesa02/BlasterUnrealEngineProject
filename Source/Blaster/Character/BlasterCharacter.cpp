@@ -1111,6 +1111,10 @@ void ABlasterCharacter::OnPlayerStateInitialized()
 	BlasterPlayerState->AddToScore(0.f);
 	BlasterPlayerState->AddToDefeats(0);
 	BlasterPlayerState->ShowElimmedText(false);
+	if (GetEquippedWeapon() != nullptr)
+	{
+		BlasterPlayerState->ShowWeaponType(GetEquippedWeapon()->GetWeaponType());
+	}
 	SetTeamColor(BlasterPlayerState->GetTeam());
 	SetSpawnPoint();
 }

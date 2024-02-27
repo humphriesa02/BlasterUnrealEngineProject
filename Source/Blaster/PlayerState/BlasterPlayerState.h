@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "Blaster/BlasterTypes/Team.h"
+#include "Blaster/Weapon/WeaponTypes.h"
 #include "BlasterPlayerState.generated.h"
 
 /**
@@ -25,9 +26,13 @@ public:
 	UFUNCTION()
 	virtual void OnRep_IsElimmedTextShown();
 
+	UFUNCTION()
+	void OnRep_ShownWeaponType();
+
 	void AddToScore(float ScoreAmount);
 	void AddToDefeats(int32 DefeatsAmount);
 	void ShowElimmedText(bool isShown);
+	void ShowWeaponType(EWeaponType WeaponType);
 private:
 	UPROPERTY()
 	class ABlasterCharacter* Character;
@@ -39,6 +44,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsElimmedTextShown)
 	bool IsElimmedTextShown;
+
+	UPROPERTY(ReplicatedUsing = OnRep_ShownWeaponType)
+	EWeaponType ShownWeaponType;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Team)
 	ETeam Team = ETeam::ET_NoTeam;

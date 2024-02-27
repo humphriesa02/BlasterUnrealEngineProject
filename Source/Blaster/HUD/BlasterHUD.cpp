@@ -82,7 +82,7 @@ void ABlasterHUD::AddElimAnnouncement(FString Attacker, FString Victim)
 	}
 }
 
-void ABlasterHUD::AddChatMessage(FString MessageText)
+void ABlasterHUD::AddChatMessage(const FString& MessageText, const FString& UserName)
 {
 	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
 	if (OwningPlayer && ChatMessageClass)
@@ -91,12 +91,7 @@ void ABlasterHUD::AddChatMessage(FString MessageText)
 		if (ChatMessageWidget)
 		{
 			ChatMessageWidget->SetChatMessageText(MessageText);
-			APlayerState* PlayerState = OwningPlayer->PlayerState;
-			if (PlayerState)
-			{
-				FString PlayerName = PlayerState->GetPlayerName();
-				ChatMessageWidget->SetChatUserName(PlayerName);
-			}
+			ChatMessageWidget->SetChatUserName(UserName);
 			ChatMessageWidget->AddToViewport();
 			ChatMessages.Add(ChatMessageWidget);
 

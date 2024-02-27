@@ -72,18 +72,29 @@ void UChatBox::ChatMessageSubmitted(const FText& Text, ETextCommit::Type CommitM
 	// Determine the commit method and handle accordingly
 	if (FirstPlayerController)
 	{
-		switch (CommitMethod)
+		APlayerState* PlayerState = FirstPlayerController->PlayerState;
+		if (PlayerState)
 		{
+			FString PlayerName = PlayerState->GetPlayerName();
+			switch (CommitMethod)
+			{
 			case ETextCommit::OnEnter:
-				if (ValidateText(CommittedText))
+				if (!CommittedText.IsEmpty())
 				{
-					FirstPlayerController->AskServerGameModeToDisplayMessage(CommittedText);
+					if (ValidateText(CommittedText))
+					{
+						FirstPlayerController->AskServerGameModeToDisplayMessage(CommittedText, PlayerName);
+					}
+					else
+					{
+						FirstPlayerController->AskServerGameModeToDisplayMessage(FString("I tried to write invalid text!"), PlayerName);
+					}
 				}
 				else
 				{
-					FirstPlayerController->AskServerGameModeToDisplayMessage(FString("I tried to say a bad word. I humbly apologize"));
+					FirstPlayerController->bChatBoxOpen = false;
+					MenuTearDown();
 				}
-				
 				break;
 			case ETextCommit::OnUserMovedFocus:
 				FirstPlayerController->bChatBoxOpen = false;
@@ -93,6 +104,7 @@ void UChatBox::ChatMessageSubmitted(const FText& Text, ETextCommit::Type CommitM
 				FirstPlayerController->bChatBoxOpen = false;
 				MenuTearDown();
 				break;
+			}
 		}
 	}
 	ChatTextBox->SetText(FText::FromString(TEXT("")));
@@ -100,11 +112,6 @@ void UChatBox::ChatMessageSubmitted(const FText& Text, ETextCommit::Type CommitM
 
 bool UChatBox::ValidateText(FString CommittedText)
 {
-	if (CommittedText.IsEmpty())
-	{
-		return false;
-	}
-
 	if (CommittedText.Len() > MaxMessageLength)
 	{
 		return false;
@@ -131,9 +138,9 @@ bool UChatBox::ValidateText(FString CommittedText)
 	return true;
 }
 
-bool UChatBox::HasExplicitWords(const FString& Message)
+bool UChatBox::HasExplicitWords(FString Message)
 {
-	TArray<FString> BadWords = { "ez", "Easy", "easy", "Nigger", "Nigga" };
+	TArray<FString> BadWords = { "ez", "Easy", "easy" };
 
 	for (const FString& BadWord : BadWords)
 	{
