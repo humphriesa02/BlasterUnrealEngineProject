@@ -1,6 +1,7 @@
 #pragma once
 
 #define TRACE_LENGTH 80000
+#define SHOTGUN_TRACE_LENGTH 2000
 
 #define CUSTOM_DEPTH_PURPLE 250
 #define CUSTOM_DEPTH_BLUE 251

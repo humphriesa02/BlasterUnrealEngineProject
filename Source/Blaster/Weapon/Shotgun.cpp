@@ -160,7 +160,7 @@ void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVect
 		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
 		const FVector EndLoc = SphereCenter + RandVec;
 		FVector ToEndLoc = EndLoc - TraceStart;
-		ToEndLoc = TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size();
+		ToEndLoc = TraceStart + ToEndLoc * SHOTGUN_TRACE_LENGTH / ToEndLoc.Size();
 
 		HitTargets.Add(ToEndLoc);
 	}

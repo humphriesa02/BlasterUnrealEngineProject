@@ -1140,7 +1140,7 @@ void ABlasterCharacter::SetSpawnPoint()
 			ATeamPlayerStart* ChosenPlayerStart = TeamPlayerStarts[FMath::RandRange(0, TeamPlayerStarts.Num() - 1)];
 			SetActorLocationAndRotation(
 				ChosenPlayerStart->GetActorLocation(),
-				ChosenPlayerStart -> GetActorRotation()
+				ChosenPlayerStart->GetActorRotation()
 			);
 		}
 	}
