@@ -47,6 +47,18 @@ public:
 
 	UPROPERTY()
 	class UAnnouncement* Announcement;
+
+	/**
+	* Handle in game menu here
+	*/
+	void ToggleInGameMenu();
+
+	void ToggleSettingsMenu();
+
+	// Overall, is there some menu open
+	bool bMenuIsOpen = false;
+
+	void CloseAllMenus();
 protected:
 	virtual void BeginPlay() override;
 private:
@@ -84,6 +96,35 @@ private:
 
 	UPROPERTY()
 	TArray<UChatMessage*> ChatMessages;
+
+	void SetPlayerFocusOnWidget(TSharedRef<SWidget>);
+
+	void ResetPlayerFocus();
+
+	/**
+	* In Game Menu base
+	*/
+
+	UPROPERTY(EditAnywhere, Category = InGameMenu)
+	TSubclassOf<class UUserWidget> InGameMenuWidget;
+
+	UPROPERTY()
+	class UInGameMenu* InGameMenu;
+
+	bool bInGameMenuOpen = false;
+
+
+	/*
+	* Settings Menu
+	*/
+	UPROPERTY(EditAnywhere, Category = InGameMenu)
+	TSubclassOf<class UUserWidget> SettingsMenuWidget;
+
+	UPROPERTY()
+	class UUserWidget* SettingsMenu;
+
+	bool bSettingsMenuOpen = false;
+
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 };

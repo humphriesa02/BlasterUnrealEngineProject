@@ -58,6 +58,11 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void AskServerGameModeToDisplayMessage(const FString& Message, const FString& UserName);
+
+	void ShowInGameSettingsMenu();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowInGameMenu();
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -101,7 +106,7 @@ protected:
 	void CheckPing(float DeltaTime);
 	void DisplayPing();
 
-	void ShowReturnToMainMenu();
+	void OpenMenus();
 
 	void ShowChatBox();
 
@@ -128,18 +133,18 @@ private:
 	*/
 
 	UPROPERTY(EditAnywhere, Category = HUD)
-	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+	TSubclassOf<class UUserWidget> InGameMenuWidget;
 
 	UPROPERTY(EditAnywhere, Category = HUD)
 	TSubclassOf<class UUserWidget> ChatBoxWidget;
 	
 	UPROPERTY()
-	class ULeaveGame* ReturnToMainMenu;
+	class UInGameMenu* InGameMenu;
 
 	UPROPERTY()
 	class UChatBox* ChatBox;
 
-	bool bReturnToMainMenuOpen = false;
+	bool bInGameMenuOpen = false;
 
 	UPROPERTY()
 	class ABlasterGameMode* BlasterGameMode;

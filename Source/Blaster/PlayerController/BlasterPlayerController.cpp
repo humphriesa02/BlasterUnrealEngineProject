@@ -16,7 +16,6 @@
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/Image.h"
-#include "Blaster/HUD/LeaveGame.h"
 #include "Blaster/HUD/ChatBox.h"
 #include "Blaster/BlasterTypes/Announcement.h"
 
@@ -233,25 +232,21 @@ void ABlasterPlayerController::DisplayPing()
 	}
 }
 
-void ABlasterPlayerController::ShowReturnToMainMenu()
+void ABlasterPlayerController::ShowInGameMenu()
 {
-	// TODO show the Return to Main Menu widget
-	if (ReturnToMainMenuWidget == nullptr) return;
-	if (ReturnToMainMenu == nullptr)
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	if (BlasterHUD)
 	{
-		ReturnToMainMenu = CreateWidget<ULeaveGame>(this, ReturnToMainMenuWidget);
+		BlasterHUD->ToggleInGameMenu();	
 	}
-	if (ReturnToMainMenu)
+}
+
+void ABlasterPlayerController::ShowInGameSettingsMenu()
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	if (BlasterHUD)
 	{
-		bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
-		if (bReturnToMainMenuOpen)
-		{
-			ReturnToMainMenu->MenuSetup();
-		}
-		else
-		{
-			ReturnToMainMenu->MenuTearDown();
-		}
+		BlasterHUD->ToggleSettingsMenu();
 	}
 }
 
@@ -717,8 +712,20 @@ void ABlasterPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 	if (InputComponent == nullptr) return;
 
-	InputComponent->BindAction("Quit", IE_Pressed, this, &ABlasterPlayerController::ShowReturnToMainMenu);
+	InputComponent->BindAction("Quit", IE_Pressed, this, &ABlasterPlayerController::OpenMenus);
 	InputComponent->BindAction("Chat", IE_Pressed, this, &ABlasterPlayerController::ShowChatBox);
+}
+
+void ABlasterPlayerController::OpenMenus()
+{
+	if (BlasterHUD->bMenuIsOpen)
+	{
+		BlasterHUD->CloseAllMenus();
+	}
+	else
+	{
+		ShowInGameMenu();
+	}
 }
 
 void ABlasterPlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)

@@ -11,6 +11,7 @@
 #include "Components/HorizontalBox.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Blaster/HUD/InGameMenu.h"
 
 void ABlasterHUD::BeginPlay()
 {
@@ -122,6 +123,128 @@ void ABlasterHUD::AddChatMessage(const FString& MessageText, const FString& User
 				ChatDisplayTime,
 				false
 			);
+		}
+	}
+}
+
+void ABlasterHUD::ToggleInGameMenu()
+{
+	if (InGameMenuWidget == nullptr) return;
+
+	if (bSettingsMenuOpen && SettingsMenu)
+	{
+		bSettingsMenuOpen = false;
+		SettingsMenu->RemoveFromParent();
+		ResetPlayerFocus();
+	}
+
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (InGameMenu == nullptr && OwningPlayer != nullptr)
+	{
+		InGameMenu = CreateWidget<UInGameMenu>(OwningPlayer, InGameMenuWidget);
+	}
+	if (InGameMenu)
+	{
+		bInGameMenuOpen = !bInGameMenuOpen;
+		if (bInGameMenuOpen)
+		{
+			InGameMenu->MenuSetup();
+			SetPlayerFocusOnWidget(InGameMenu->TakeWidget());
+		}
+		else
+		{
+			InGameMenu->MenuTearDown();
+			ResetPlayerFocus();
+		}
+	}
+
+	if (!bMenuIsOpen)
+	{
+		bMenuIsOpen = true;
+	}
+}
+
+void ABlasterHUD::ToggleSettingsMenu()
+{
+	if (bInGameMenuOpen && InGameMenu != nullptr)
+	{
+		bInGameMenuOpen = false;
+		InGameMenu->MenuTearDown();
+		ResetPlayerFocus();
+	}
+	if (SettingsMenuWidget == nullptr) return;
+
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (SettingsMenu == nullptr && OwningPlayer != nullptr)
+	{
+		SettingsMenu = CreateWidget<UUserWidget>(OwningPlayer, SettingsMenuWidget);
+	}
+	if (SettingsMenu)
+	{
+		bSettingsMenuOpen = !bSettingsMenuOpen;
+		if (bSettingsMenuOpen)
+		{
+			SettingsMenu->AddToViewport();
+			SettingsMenu->SetVisibility(ESlateVisibility::Visible);
+			SettingsMenu->bIsFocusable = true;
+			SetPlayerFocusOnWidget(SettingsMenu->TakeWidget());
+		}
+		else
+		{
+			SettingsMenu->RemoveFromParent();
+			ResetPlayerFocus();
+		}
+	}
+
+	if (!bMenuIsOpen)
+	{
+		bMenuIsOpen = true;
+	}
+}
+
+void ABlasterHUD::CloseAllMenus()
+{
+	if (bInGameMenuOpen)
+	{
+		bInGameMenuOpen = false;
+		InGameMenu->MenuTearDown();
+	}
+	if (bSettingsMenuOpen)
+	{
+		bSettingsMenuOpen = false;
+		SettingsMenu->RemoveFromParent();
+	}
+	ResetPlayerFocus();
+	bMenuIsOpen = false;
+}
+
+void ABlasterHUD::SetPlayerFocusOnWidget(TSharedRef<SWidget> WidgetToFocus)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+		if (OwningPlayer)
+		{
+			FInputModeGameAndUI InputModeData;
+			InputModeData.SetWidgetToFocus(WidgetToFocus);
+			OwningPlayer->SetInputMode(InputModeData);
+			OwningPlayer->SetShowMouseCursor(true);
+		}
+	}
+}
+
+void ABlasterHUD::ResetPlayerFocus()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+		if (OwningPlayer)
+		{
+			FInputModeGameOnly InputModeData;
+			OwningPlayer->SetInputMode(InputModeData);
+			OwningPlayer->SetShowMouseCursor(false);
 		}
 	}
 }
